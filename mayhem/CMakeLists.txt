@@ -1,0 +1,6 @@
+add_executable(fuzz_libpointmatcher fuzz_lib.cpp)
+
+target_compile_options(fuzz_libpointmatcher PRIVATE -fsanitize=undefined,fuzzer)
+target_link_options(fuzz_libpointmatcher PRIVATE -fsanitize=undefined,fuzzer)
+
+target_link_libraries(fuzz_libpointmatcher pointmatcher)

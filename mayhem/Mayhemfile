@@ -1,0 +1,5 @@
+project: libpointmatcher
+target: lib-fuzz
+cmds:
+  - cmd: /fuzz_lib
+    libfuzzer: true
