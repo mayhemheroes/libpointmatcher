@@ -48,14 +48,12 @@ extern "C" __attribute__((unused)) int LLVMFuzzerTestOneInput(const uint8_t *fuz
     } catch (boost::exception &e) {
         return -1;
     } catch (std::runtime_error &e) {
-        if (std::string(e.what()).find("magic header") != std::string::npos ||
-            std::string(e.what()).find("Wrong file type") != std::string::npos ||
-            std::string(e.what()).find("Mayhem") != std::string::npos ||
-            std::string(e.what()).find("CSV parse") != std::string::npos) {
-            return -1;
-        } else {
-            throw;
-        }
+//        if (std::string(e.what()).find("magic header") != std::string::npos ||
+//            std::string(e.what()).find("Wrong file type") != std::string::npos ||
+//            std::string(e.what()).find("Mayhem") != std::string::npos ||
+//            std::string(e.what()).find("CSV parse") != std::string::npos) {
+//            return -1;
+            return 1;
     }
     return 0;
 }
