@@ -53,7 +53,7 @@ extern "C" __attribute__((unused)) int LLVMFuzzerTestOneInput(const uint8_t *fuz
 //            std::string(e.what()).find("Mayhem") != std::string::npos ||
 //            std::string(e.what()).find("CSV parse") != std::string::npos) {
 //            return -1;
-            return 1;
+            return -1;
     }
     return 0;
 }
