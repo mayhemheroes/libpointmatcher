@@ -604,7 +604,9 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 				if (!(dim == 2 || dim == 3))
 				{
 					int idX=0, idY=0, idZ=0;
-
+#ifdef MAYHEM
+                    throw std::runtime_error("Mayhem fuzzer reached cin");
+#else
 					cout << "WARNING: " << dim << " columns detected. Not obvious which columns to load for x, y or z." << endl;
 					cout << endl << "Enter column ID (starting from 0) for x: ";
 					cin >> idX;
@@ -627,6 +629,7 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 					csvHeader[idY] = GenericInputHeader("y");
 					if(idZ != -1)
 						csvHeader[idZ] = GenericInputHeader("z");
+#endif
 				}
 				else
 				{
@@ -637,7 +640,6 @@ typename PointMatcher<T>::DataPoints PointMatcherIO<T>::loadCSV(std::istream& is
 						csvHeader.push_back(GenericInputHeader("z"));
 				}
 			}
-
 			//2- PROCESS HEADER
 			// Load known features, descriptors, and time
 			const SupportedLabels externalLabels = getSupportedExternalLabels();

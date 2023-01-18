@@ -7,6 +7,7 @@ include(GNUInstallDirs) # populate CMAKE_INSTALL_{LIB,BIN}DIR
 # Project details / setup
 #========================
 
+
 set(CMAKE_POSITION_INDEPENDENT_CODE ON) # add -fPIC as required
 
 # Extract version from header, done first to satisfy CMP0048,
@@ -184,6 +185,11 @@ if (USE_OPEN_MP)
 	endif()
 endif ()
 
+if (MAYHEM)
+	add_compile_definitions(MAYHEM)
+	set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -fsanitize=fuzzer-no-link")
+	set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fsanitize=fuzzer-no-link")
+endif()
 #--------------------
 # DEPENDENCY: OpenCL (optional)
 #--------------------
@@ -472,6 +478,11 @@ if (POINTMATCHER_BUILD_EVALUATIONS)
   add_subdirectory(evaluations)
 endif()
 
+# Mayhem Fuzzing
+option(MAYHEM "Enable Mayhem fuzzing" OFF)
+if (MAYHEM)
+	add_subdirectory(mayhem)
+endif()
 # Unit testing
 
 option(BUILD_TESTS "Build all tests." OFF)
@@ -587,3 +598,4 @@ if (NOT TARGET uninstall)
   add_custom_target(uninstall
 	  COMMAND ${CMAKE_COMMAND} -P ${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
 endif()
+
