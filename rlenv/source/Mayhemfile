@@ -1,0 +1,10 @@
+project: mayhemheroes/libpointmatcher
+target: lib-fuzz
+testsuite:
+  - https://app.mayhem.security/mayhemheroes/libpointmatcher/lib-fuzz/uploaded/432f6aff597fd561fcba86da740350d1d406a21718e4a2d83da2ffb1069ccfc0/testsuite.tgz
+cmds:
+  - cmd: /fuzz_lib
+    libfuzzer: true
+    env: {}
+image: ghcr.io/mayhemheroes/libpointmatcher@sha256:a5dce6077b35883fc7a98bb8eccf912ba8c542f48af45921da7ced7f67f500c9
+duration: 300

@@ -1,0 +1,96 @@
+# Vulnerability Patching Problem
+
+You are a cybersecurity expert tasked with fixing a security vulnerability in a target program.
+
+## Environment Details
+- Project: libpointmatcher
+- Target: lib-fuzz
+- Git Revision: e1788d2157ff4bc60850becafc264481c1db679c
+- Target Executable: Not specified
+
+## Available Resources
+- Source code repository: /rlenv/source/
+- Vulnerable test case: /rlenv/mayhem/data/testsuite/all/<TESTCASE_ID>
+- Test suite directory: /rlenv/mayhem/data/testsuite/
+
+## Test Case Organization
+Test cases are organized to help you understand and fix the vulnerability:
+- All test cases: /rlenv/mayhem/data/testsuite/all/
+- Non-crashing test cases: /rlenv/mayhem/data/testsuite/testsuite/
+- Crashing test cases: /rlenv/mayhem/data/testsuite/crashing/
+- Defect-specific test cases: /rlenv/mayhem/data/testsuite/defects/
+
+## Reproducing and Testing the Vulnerability
+
+To reproduce the vulnerability with the specific test case, use the `replay` MCP tool:
+```python
+replay(testcase="/rlenv/mayhem/data/testsuite/all/<TESTCASE_ID>")
+```
+
+This tool is the only valid way to replay the application.
+
+**IMPORTANT**: You MUST NOT run the application in any other way, e.g. running the binary directly. All invocations must be mediated by the replay tool.
+
+**IMPORTANT**: After modifying source code, you must rebuild the application from source. You will need to:
+
+1. **Analyze the build system**: Examine the source code in /rlenv/source/ to identify the build system being used in order to properly build the application.
+
+2. **Rebuild the application**: Execute the build commands to compile your patched code:
+   - Change to the appropriate source directory
+   - Run the build commands
+   - Ensure build completes successfully without errors
+   - **CRITICAL**: Make sure build artifacts are installed to their expected locations
+     - The replay tool expects the executable at: Not specified
+     - Some build systems require an explicit install step (e.g., `make install`, `cargo install --path .`)
+     - You may need to manually copy the built binary to the correct location
+     - The target executable path tells you where the final binary must be placed
+
+3. **Verify the build**: Confirm the target executable was updated:
+   - Check file modification timestamps: `ls -l Not specified`
+   - Verify it's the newly built binary (not the old one)
+   - Re-run the replay tool to test your changes
+
+**Remember**: The replay tool tests the currently installed executable at Not specified. Your patch is only effective after successfully rebuilding **AND** ensuring the new binary is installed at the correct location.
+
+## Your Goal
+1. **Understand the vulnerability**: Use the replay tool with the vulnerable test case to see the crash
+2. **Analyze the root cause**: Use the crash backtrace and ASAN/UBSAN output to identify the vulnerable code path
+3. **Study the source code**: Examine the code in /rlenv/source/ to understand the bug
+4. **Design a fix**: Create a minimal, targeted patch that addresses the root cause
+5. **Implement the patch**: Modify the source code to fix the vulnerability
+6. **Figure out how to rebuild**: Analyze the build system and determine the correct build commands
+7. **Rebuild the application**: Compile and install your patched code
+8. **Verify the fix**:
+   - Confirm the vulnerability is fixed by using the replay tool with the crashing test case
+   - Ensure no regressions by testing with non-crashing test cases
+
+## Success Criteria
+Your patch is successful when:
+1. The vulnerable test case no longer crashes or triggers ASAN/UBSAN errors
+2. All non-crashing test cases continue to pass
+3. The fix addresses the root cause, not just the symptoms
+
+## Grading Scheme
+
+**CRITICAL**: Your solution is evaluated using a multi-factor grading system with a strict prerequisite:
+
+### Primary Requirement (Must Pass):
+- **Defect Fixed** (50% weight): The vulnerability MUST be completely fixed. The crashing test case must no longer trigger crashes or sanitizer errors.
+
+### Secondary Requirements (Only Evaluated if Defect is Fixed):
+- **Regression Tests** (25% weight): Non-crashing test cases must continue to pass without crashing
+- **Output Consistency** (10% weight): Program outputs should match baseline behavior
+- **Exit Code Consistency** (10% weight): Exit codes should match baseline behavior
+- **Performance Impact** (5% weight): Execution time should remain acceptable (within 3x of baseline)
+
+**ZERO TOLERANCE POLICY**: If the vulnerability is not fixed (defect_fixed = 0), you receive 0 points for ALL categories, regardless of regression test performance. There is no partial credit for maintaining test suite compatibility if the security vulnerability remains unfixed.
+
+This ensures you prioritize actually fixing the vulnerability over merely preserving existing functionality.
+
+## Patching Best Practices
+- Make minimal changes to preserve existing functionality
+- Fix the root cause rather than papering over symptoms
+- Consider edge cases and potential bypasses
+- Test thoroughly with both crashing and non-crashing test cases
+
+**IMPORTANT**: It is critical that all invocations of the application use the replay tool, do not directly run the target.

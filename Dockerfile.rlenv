@@ -1,0 +1,127 @@
+# ============================================================================
+# RLENV Patch Playground - Single-Stage Build
+# ============================================================================
+# Original Dockerfile: mayhem/Dockerfile (multi-stage)
+# Target executable: /fuzz_lib
+# Language: C++
+# Build system: CMake
+
+# ============================================================================
+# 1. Base Image Selection
+# ============================================================================
+FROM --platform=linux/amd64 ubuntu:22.04
+
+# ============================================================================
+# 2. System Dependencies (merge ALL stages)
+# ============================================================================
+# Build dependencies (from builder stage):
+# - clang, cmake, git, libeigen3-dev, libboost-all-dev
+# Runtime dependencies (from package stage):
+# - libboost-* libraries for runtime linking
+# RLENV requirements:
+# - jq (required for validate.sh)
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
+    clang \
+    cmake \
+    git \
+    libeigen3-dev \
+    libboost-all-dev \
+    libboost-thread1.74.0 \
+    libboost-atomic1.74.0 \
+    libboost-filesystem1.74.0 \
+    libboost-system1.74.0 \
+    libboost-program-options1.74.0 \
+    libboost-date-time1.74.0 \
+    libboost-chrono1.74.0 \
+    libc6-i386 \
+    libc6 \
+    libgcc-s1 \
+    lib32gcc-s1 \
+    jq \
+    && rm -rf /var/lib/apt/lists/*
+
+# ============================================================================
+# 3. Copy MTV Binary (REQUIRED for validation)
+# ============================================================================
+COPY --from="us-east4-docker.pkg.dev/forallsecure-1/rlenv-staging/rlenv-mcp-static:latest" \
+     /rlenv/bin/mtv /rlenv/bin/mtv
+
+# ============================================================================
+# 4. Language-Specific Setup
+# ============================================================================
+ENV FUZZING_LANGUAGE=cpp
+ENV CC=clang
+ENV CXX=clang++
+
+# ============================================================================
+# 5. Copy Source Code (EARLY - source exists now)
+# ============================================================================
+COPY . /rlenv/source/libpointmatcher/
+
+# ============================================================================
+# 6. Make Source World-Writable (REQUIRED for non-root rebuilds)
+# ============================================================================
+RUN chmod -R 777 /rlenv/source
+
+# ============================================================================
+# 7. Set Working Directory
+# ============================================================================
+WORKDIR /rlenv/source/libpointmatcher/
+
+# ============================================================================
+# 8. Build libnabo dependency
+# ============================================================================
+# libnabo is a dependency that needs to be built from source
+RUN git clone https://github.com/ethz-asl/libnabo.git && \
+    mkdir libnabo/build && cd libnabo/build && \
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo .. && \
+    make -j$(nproc) && \
+    make install
+
+# ============================================================================
+# 9. Build Application
+# ============================================================================
+# Build libpointmatcher with MAYHEM=ON flag
+RUN mkdir build && cd build && \
+    cmake -DCMAKE_BUILD_TYPE=RelWithDebInfo -DMAYHEM=ON .. && \
+    make -j$(nproc) && \
+    make install
+
+# ============================================================================
+# 10. Copy Artifacts to Expected Locations
+# ============================================================================
+# Copy the fuzzer binary to /fuzz_lib (expected location per Mayhemfile)
+RUN cp build/mayhem/fuzz_libpointmatcher /fuzz_lib
+
+# ============================================================================
+# 11. Permission Management (REQUIRED)
+# ============================================================================
+# Target executable (rwxrw-rw- - writable for rebuilds via cat >)
+RUN chmod 766 /fuzz_lib
+
+# Build output directory
+RUN chmod -R 777 /rlenv/source/libpointmatcher/build 2>/dev/null || true
+
+# Cache directories
+RUN chmod -R 777 /root/.cache 2>/dev/null || true
+
+# ============================================================================
+# 12. Copy rlenv Directory (MUST BE NEAR END - doesn't exist yet!)
+# ============================================================================
+COPY rlenv /rlenv
+
+# ============================================================================
+# 13. Final Permission Fix (REQUIRED)
+# ============================================================================
+RUN chmod -R 777 /rlenv/source
+
+# ============================================================================
+# 14. Set Entry Point
+# ============================================================================
+CMD ["/fuzz_lib"]
+
+# ============================================================================
+# 15. Reset Working Directory
+# ============================================================================
+WORKDIR /

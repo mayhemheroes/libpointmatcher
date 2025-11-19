@@ -5,3 +5,4 @@
 *.cur_trans
 build
 .ipynb_checkpoints/
+rlenv/mayhem/data/testsuite

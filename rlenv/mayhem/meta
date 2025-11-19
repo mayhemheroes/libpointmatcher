@@ -1,0 +1,11 @@
+{
+  "workspace": "mayhemheroes",
+  "project": "libpointmatcher",
+  "target": "lib-fuzz",
+  "run_id": "1",
+  "ci_url": "https://github.com:443/mayhemheroes/libpointmatcher//actions/runs/3951519755",
+  "run_image_name": "ghcr.io/mayhemheroes/libpointmatcher:master",
+  "run_image_with_digest": "ghcr.io/mayhemheroes/libpointmatcher@sha256:a5dce6077b35883fc7a98bb8eccf912ba8c542f48af45921da7ced7f67f500c9",
+  "git_repo_url": "git@github.com:mayhemheroes/libpointmatcher.git",
+  "git_revision": "e1788d2157ff4bc60850becafc264481c1db679c"
+}
