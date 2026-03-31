@@ -1,0 +1,7 @@
+project: libpointmatcher
+target: lib-fuzz
+testsuite:
+    - file://mayhem/testsuite
+cmds:
+  - cmd: /fuzz_lib
+    libfuzzer: true
