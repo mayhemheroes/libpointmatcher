@@ -1,0 +1,8 @@
+project: libpointmatcher
+target: lib-fuzz
+testsuite:  # mayhem-lint: keep-testsuite — CSV/VTK point-cloud parsers are format-gated; random bytes never reach the real parsing code without valid seeds
+  - file:///mayhem/mayhem/testsuite/lib_fuzz
+cmds:
+  - cmd: /mayhem/fuzz_lib
+    libfuzzer: true
+    cwd: /dev/shm
